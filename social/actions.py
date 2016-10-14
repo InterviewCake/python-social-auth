@@ -1,6 +1,7 @@
 from social.p3 import quote
 from social.utils import sanitize_redirect, user_is_authenticated, \
-                         user_is_active, partial_pipeline_data, setting_url
+                         user_is_active, user_is_anonymous, \
+                         partial_pipeline_data, setting_url
 
 
 def do_auth(backend, redirect_name='next'):
@@ -31,10 +32,17 @@ def do_auth(backend, redirect_name='next'):
 
 def do_complete(backend, login, user=None, redirect_name='next',
                 *args, **kwargs):
+    anonymous_user = None
     data = backend.strategy.request_data()
 
+    # check if the user is anonymous
+    # if so, put her aside to go in the pipeline as anonymous_user
+    # and set user to none
     is_authenticated = user_is_authenticated(user)
-    user = is_authenticated and user or None
+    is_anonymous = user_is_anonymous(user)
+    if is_anonymous:
+        anonymous_user = user
+        user = None
 
     partial = partial_pipeline_data(backend, user, *args, **kwargs)
     if partial:
