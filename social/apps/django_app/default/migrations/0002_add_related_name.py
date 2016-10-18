@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 from django.conf import settings
 
+import social.storage.django_orm
 from social.utils import setting_name
 
 USER_MODEL = getattr(settings, setting_name('USER_MODEL'), None) or \
@@ -19,9 +20,28 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.CreateModel(
+            name='Code',
+            fields=[
+                ('id', models.AutoField(
+                    verbose_name='ID', serialize=False, auto_created=True,
+                    primary_key=True)),
+                ('email', models.EmailField(max_length=75)),
+                ('code', models.CharField(max_length=32, db_index=True)),
+                ('verified', models.BooleanField(default=False)),
+            ],
+            options={
+                'db_table': 'social_auth_code',
+            },
+            bases=(models.Model, social.storage.django_orm.DjangoCodeMixin),
+        ),
         migrations.AlterField(
             model_name='usersocialauth',
             name='user',
             field=models.ForeignKey(related_name='social_auth', to=USER_MODEL)
+        ),
+        migrations.AlterUniqueTogether(
+            name='code',
+            unique_together={('email', 'code')},
         ),
     ]
