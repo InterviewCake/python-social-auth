@@ -47,9 +47,9 @@ def do_complete(backend, login, user=None, redirect_name='next',
     partial = partial_pipeline_data(backend, user, *args, **kwargs)
     if partial:
         xargs, xkwargs = partial
-        user = backend.continue_pipeline(*xargs, **xkwargs)
+        user = backend.continue_pipeline(anonymous_user=anonymous_user, *xargs, **xkwargs)
     else:
-        user = backend.complete(user=user, *args, **kwargs)
+        user = backend.complete(user=user, anonymous_user=anonymous_user, *args, **kwargs)
 
     # pop redirect value before the session is trashed on login(), but after
     # the pipeline so that the pipeline can change the redirect if needed
